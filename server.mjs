@@ -7,9 +7,12 @@ import { verifyConnection } from './Utils/Nodemailer.mjs';
 
 const app = express();
 const allowedOrigins = [
-  "https://push.digital",
-  "https://www.push.digital",
+  "null",                              // file:// protocol — local HTML opened directly in browser
   "http://localhost:3000",
+  "http://localhost:5500",             // VS Code Live Server
+  "http://127.0.0.1:5500",            // VS Code Live Server (alternate)
+  "https://organicheritage.store",
+  "https://www.organicheritage.store",
 ];
 
 app.use(cors({
