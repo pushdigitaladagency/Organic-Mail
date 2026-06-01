@@ -15,13 +15,14 @@ const TIMEOUT_MS = parseInt(process.env.SMTP_TIMEOUT_MS || '10000', 10);
 //
 // ✅  We use Brevo (formerly Sendinblue) SMTP instead:
 //     • Free tier: 300 emails/day
-//     • Port 587 (STARTTLS) — never blocked by Render
+//     • Port 465 (SSL) — used because Render blocks outbound port 587 (STARTTLS)
+//     • Port 465 wraps the connection in TLS immediately — no STARTTLS handshake
 //     • Sign up: https://app.brevo.com → SMTP & API → Generate SMTP key
 //     • Set BREVO_USER and BREVO_SMTP_KEY in your Render environment variables.
 const transporter = nodemailer.createTransport({
   host: 'smtp-relay.brevo.com',
-  port:   587,               // Port 587 — standard STARTTLS
-  secure: false,            // STARTTLS
+  port: 465,                // Port 465 — direct SSL (not blocked by Render)
+  secure: true,             // true = SSL/TLS immediately (required for port 465)
   auth: {
     user: process.env.BREVO_USER,       // Your Brevo login email
     pass: process.env.BREVO_SMTP_KEY,   // Brevo SMTP key (not your password)
