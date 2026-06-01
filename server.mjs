@@ -11,6 +11,8 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5500",             // VS Code Live Server
   "http://127.0.0.1:5500",            // VS Code Live Server (alternate)
+  "http://localhost:5501",             // VS Code Live Server (port auto-incremented)
+  "http://127.0.0.1:5501",            // VS Code Live Server (port auto-incremented, alternate)
   "https://organicheritage.store",
   "https://www.organicheritage.store",
 ];
