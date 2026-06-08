@@ -15,17 +15,18 @@ const TIMEOUT_MS = parseInt(process.env.SMTP_TIMEOUT_MS || '10000', 10);
 //
 // ✅  We use Brevo (formerly Sendinblue) SMTP instead:
 //     • Free tier: 300 emails/day
-//     • Port 465 (SSL) — used because Render blocks outbound port 587 (STARTTLS)
-//     • Port 465 wraps the connection in TLS immediately — no STARTTLS handshake
+//     • Host: smtp-relay.sendinblue.com port 587 (STARTTLS)
+//       ↳ Does NOT require IP whitelisting — authenticates via SMTP key only.
+//       ↳ smtp-relay.brevo.com (the newer relay) requires IP whitelist in dashboard.
 //     • Sign up: https://app.brevo.com → SMTP & API → Generate SMTP key
 //     • Set BREVO_USER and BREVO_SMTP_KEY in your Render environment variables.
 const transporter = nodemailer.createTransport({
-  host: 'smtp-relay.brevo.com',
-  port: 2525,               // Port 2525 — Brevo's cloud-friendly alternative (bypasses Render/Railway blocks)
-  secure: false,             // STARTTLS upgrade (same as 587 but on 2525)
+  host: 'smtp-relay.sendinblue.com',   // Brevo's STARTTLS endpoint — no IP whitelist required
+  port: 587,                            // STARTTLS port — universally open on Render/Railway
+  secure: false,                        // false = STARTTLS upgrade after connect
   auth: {
     user: process.env.BREVO_USER,       // Your Brevo login email
-    pass: process.env.BREVO_SMTP_KEY,   // Brevo SMTP key (not your password)
+    pass: process.env.BREVO_SMTP_KEY,   // Brevo SMTP key (not your account password)
   },
   // Layer 1 timeout: Nodemailer's own connection deadlines.
   connectionTimeout: TIMEOUT_MS,
@@ -39,7 +40,7 @@ const transporter = nodemailer.createTransport({
 // stall — guarantees the Promise always settles within `ms` milliseconds.
 const withTimeout = (promise, ms) => {
   const deadline = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error(`SMTP timed out after ${ms}ms — Gmail may be blocking this host`)), ms)
+    setTimeout(() => reject(new Error(`SMTP timed out after ${ms}ms — Brevo SMTP may be unreachable from this host`)), ms)
   );
   return Promise.race([promise, deadline]);
 };
@@ -61,7 +62,7 @@ export const verifyConnection = async () => {
 // ─── sendEnquiryEmail ─────────────────────────────────────────────────────────
 // Core email function. Decoupled from Express req/res so it can be tested
 // independently and reused. Returns a result object — never throws.
-export const sendEnquiryEmail = async ({ name, email, phone, message,sub }) => {
+export const sendEnquiryEmail = async ({ name, email, phone, message,sub , product }) => {
   const mailOptions = {
     from:    process.env.EMAIL_FROM ,
     to:      process.env.ENQUIRY_RECIPIENT ,
@@ -149,6 +150,16 @@ export const sendEnquiryEmail = async ({ name, email, phone, message,sub }) => {
                   ${phone}
                 </td>
               </tr>
+
+              ${product ? `
+              <tr>
+                <td style="padding:10px; border-bottom:1px solid #eee; color:#888;">
+                  Product
+                </td>
+                <td style="padding:10px; border-bottom:1px solid #eee; color:#333;">
+                  ${product}
+                </td>
+              </tr>` : ''}
 
             </table>
 
