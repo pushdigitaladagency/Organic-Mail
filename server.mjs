@@ -7,14 +7,8 @@ import { verifyConnection } from './Utils/Nodemailer.mjs';
 
 const app = express();
 const allowedOrigins = [
-  "null",                              // file:// protocol — local HTML opened directly in browser
-  "http://localhost:3000",
-  "http://localhost:5500",             // VS Code Live Server
-  "http://127.0.0.1:5500",            // VS Code Live Server (alternate)
-  "http://localhost:5501",             // VS Code Live Server (port auto-incremented)
-  "http://127.0.0.1:5501",            // VS Code Live Server (port auto-incremented, alternate)
-  "https://organicheritage.store",
-  "https://www.organicheritage.store",
+  "http://organicheritage.store",
+  "http://www.organicheritage.store",
 ];
 
 app.use(cors({
