@@ -7,8 +7,8 @@ import { verifyConnection } from './Utils/Nodemailer.mjs';
 
 const app = express();
 const allowedOrigins = [
-  "http://organicheritage.store",
-  "http://www.organicheritage.store",
+  "https://organicheritage.store",
+  "https://www.organicheritage.store",
 ];
 
 app.use(cors({
