@@ -13,10 +13,15 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow requests with no origin (server-to-server, curl, Render health checks)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      // Log the blocked origin — makes debugging CORS issues on Render much easier
+      console.warn(`[CORS] Blocked request from origin: ${origin}`);
+      callback(new Error(`CORS: origin '${origin}' is not allowed`));
     }
   },
   credentials: true,

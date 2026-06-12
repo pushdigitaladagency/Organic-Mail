@@ -21,17 +21,20 @@ const TIMEOUT_MS = parseInt(process.env.SMTP_TIMEOUT_MS || '10000', 10);
 //     • Sign up: https://app.brevo.com → SMTP & API → Generate SMTP key
 //     • Set BREVO_USER and BREVO_SMTP_KEY in your Render environment variables.
 const transporter = nodemailer.createTransport({
-  host: 'smtp-relay.sendinblue.com',   // Brevo's STARTTLS endpoint — no IP whitelist required
-  port: 587,                            // STARTTLS port — universally open on Render/Railway
-  secure: false,                        // false = STARTTLS upgrade after connect
+  // ⚠️  Must match your credential format:
+  //   @smtp-brevo.com login  →  use smtp-relay.brevo.com  (requires IP whitelist in Brevo dashboard)
+  //   Brevo account email    →  use smtp-relay.sendinblue.com  (no IP whitelist needed)
+  host: 'smtp-relay.brevo.com',
+  port: 587,
+  secure: false,   // false = STARTTLS upgrade after connect
   auth: {
-    user: process.env.BREVO_USER,       // Your Brevo login email
-    pass: process.env.BREVO_SMTP_KEY,   // Brevo SMTP key (not your account password)
+    user: process.env.BREVO_USER,      // e.g. ad2527001@smtp-brevo.com  (from Brevo SMTP & API page)
+    pass: process.env.BREVO_SMTP_KEY,  // SMTP key from Brevo dashboard (not your account password)
   },
   // Layer 1 timeout: Nodemailer's own connection deadlines.
   connectionTimeout: TIMEOUT_MS,
-  greetingTimeout:   TIMEOUT_MS,
-  socketTimeout:     TIMEOUT_MS,
+  greetingTimeout: TIMEOUT_MS,
+  socketTimeout: TIMEOUT_MS,
 });
 
 // ─── withTimeout ──────────────────────────────────────────────────────────────
@@ -62,11 +65,11 @@ export const verifyConnection = async () => {
 // ─── sendEnquiryEmail ─────────────────────────────────────────────────────────
 // Core email function. Decoupled from Express req/res so it can be tested
 // independently and reused. Returns a result object — never throws.
-export const sendEnquiryEmail = async ({ name, email, phone, message,sub , product }) => {
+export const sendEnquiryEmail = async ({ name, email, phone, message,sub, product }) => {
   const mailOptions = {
-    from:    process.env.EMAIL_FROM ,
-    to:      process.env.ENQUIRY_RECIPIENT ,
-    cc:      process.env.ENQUIRY_CC,
+    from: process.env.EMAIL_FROM,
+    to: process.env.ENQUIRY_RECIPIENT,
+    cc: process.env.ENQUIRY_CC,
     subject: sub || `Business query from ${name}`,
     html: `<!DOCTYPE html>
 <html>
