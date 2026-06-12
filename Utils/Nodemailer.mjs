@@ -25,7 +25,7 @@ const transporter = nodemailer.createTransport({
   //   @smtp-brevo.com login  →  use smtp-relay.brevo.com  (requires IP whitelist in Brevo dashboard)
   //   Brevo account email    →  use smtp-relay.sendinblue.com  (no IP whitelist needed)
   host: 'smtp-relay.brevo.com',
-  port: 587,
+  port: 2525,
   secure: false,   // false = STARTTLS upgrade after connect
   auth: {
     user: process.env.BREVO_USER,      // e.g. ad2527001@smtp-brevo.com  (from Brevo SMTP & API page)
