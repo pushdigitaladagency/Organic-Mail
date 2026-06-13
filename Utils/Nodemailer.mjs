@@ -65,12 +65,25 @@ export const verifyConnection = async () => {
 // ─── sendEnquiryEmail ─────────────────────────────────────────────────────────
 // Core email function. Decoupled from Express req/res so it can be tested
 // independently and reused. Returns a result object — never throws.
-export const sendEnquiryEmail = async ({ name, email, phone, message,sub, product }) => {
+export const sendEnquiryEmail = async ({ name, email, phone, message, sub , product }) => {
+  
+  const finalsub = async(product,sub)=>{
+    if(sub){
+      return `Contact Enquiry:New Enquiry from <${name}><${sub}>`
+    }
+    else if (product){
+      return `Product Enquiry:<${product}> from <${name}>`
+    }
+    else{
+      return `General Enquiry : New Enquiry from <${name}>`
+    }
+  }
+
   const mailOptions = {
     from: process.env.EMAIL_FROM,
     to: process.env.ENQUIRY_RECIPIENT,
     cc: process.env.ENQUIRY_CC,
-    subject: sub || `Business query from ${name}`,
+    subject: await finalsub(product,sub),
     html: `<!DOCTYPE html>
 <html>
 <head>
@@ -253,7 +266,7 @@ export const sendEnquiryEmail = async ({ name, email, phone, message,sub, produc
 // is called in ALL code paths.
 const mail_service = async (req, res) => {
   // Safe fallback: prevents crash if body parsing failed (missing Content-Type header)
-  const { name, email, phone, message } = req.body || {};
+  const { name, email, phone, message, sub, product } = req.body || {};
 
   // Validate BEFORE touching SMTP — returns 400 instantly
   if (!name || !email || !message) {
@@ -264,7 +277,7 @@ const mail_service = async (req, res) => {
   }
 
   try {
-    const result = await sendEnquiryEmail({ name, email, phone, message });
+    const result = await sendEnquiryEmail({ name, email, phone, message, sub, product });
 
     if (result.success) {
       return res.status(200).json({ success: true, message: 'Email sent successfully' });
