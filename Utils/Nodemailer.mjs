@@ -69,13 +69,13 @@ export const sendEnquiryEmail = async ({ name, email, phone, message, sub , prod
   
   const finalsub = async(product,sub)=>{
     if(sub){
-      return `Contact Enquiry:New Enquiry from <${name}><${sub}>`
+      return `Contact Enquiry:New Enquiry from ${name} subject: ${sub}`
     }
     else if (product){
-      return `Product Enquiry:<${product}> from <${name}>`
+      return `Product Enquiry:${product} from ${name}`
     }
     else{
-      return `General Enquiry : New Enquiry from <${name}>`
+      return `General Enquiry : New Enquiry from ${name}`
     }
   }
 
